@@ -1,0 +1,28 @@
+name: Release
+
+on:
+  release:
+    types: [created]
+
+jobs:
+  build-binary:
+    runs-on: ubuntu-20.04
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Build Binary
+        run: |
+          sudo apt-get update -y
+          sudo add-apt-repository ppa:neurobin/ppa -y
+          sudo apt-get update -y
+          sudo apt-get install shc -y
+          chmod +x wireguard-install.sh
+          shc -vrf wireguard-install.sh -o wireguard-ctl
+
+      - name: Release Binary
+        uses: softprops/action-gh-release@v1
+        if: startsWith(github.ref, 'refs/tags/')
+        with:
+          files: wireguard-ctl
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
